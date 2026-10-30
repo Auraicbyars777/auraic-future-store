@@ -95,6 +95,13 @@ maxAge: 1000 * 60 * 60 * 4
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/style.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'style.css'));
+});
+
+app.get('/script.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'script.js'));
+});
 
 function adminOnly(req, res, next) {
 if (req.session && req.session.admin === true) {

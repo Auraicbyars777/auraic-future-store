@@ -21,11 +21,16 @@ const ADMIN_PASSWORD_HASH = ADMIN_PASSWORD
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const DATABASE_PATH = process.env.DATABASE_PATH || path.join(__dirname, 'auraic.db');
 
-if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH || !SESSION_SECRET) {
-console.error(
-'Missing required environment variables: ADMIN_USERNAME, ADMIN_PASSWORD_HASH, SESSION_SECRET'
-);
-process.exit(1);
+if (!ADMIN_USERNAME || !ADMIN_PASSWORD || !SESSION_SECRET) {
+  console.error(
+    'Missing required environment variables: ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET'
+  );
+  process.exit(1);
+}
+
+if (ADMIN_PASSWORD.length < 12) {
+  console.error('ADMIN_PASSWORD must contain at least 12 characters.');
+  process.exit(1);
 }
 
 if (SESSION_SECRET.length < 32) {

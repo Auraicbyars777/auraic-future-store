@@ -14,7 +14,10 @@ const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD_HASH = ADMIN_PASSWORD
+  ? bcrypt.hashSync(ADMIN_PASSWORD, 12)
+  : '';
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const DATABASE_PATH = process.env.DATABASE_PATH || path.join(__dirname, 'auraic.db');
 

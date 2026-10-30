@@ -48,6 +48,16 @@ if (ADMIN_PASSWORD.length < 12) {
 }
 
 if (SESSION_SECRET.length < 32) {
+  console.error('SESSION_SECRET must contain at least 32 characters.');
+  process.exit(1);
+}
+
+if (ADMIN_PASSWORD.length < 12) {
+  console.error('ADMIN_PASSWORD must contain at least 12 characters.');
+  process.exit(1);
+}
+
+if (SESSION_SECRET.length < 32) {
 console.error('SESSION_SECRET must contain at least 32 characters.');
 process.exit(1);
 }

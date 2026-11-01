@@ -218,9 +218,26 @@
           <textarea id="productDescription" rows="3"
                     maxlength="2000"></textarea>
 
-          <label for="productImage">Front image URL *</label>
-          <input id="productImage" type="url" maxlength="1000" required
-                 placeholder="https://example.com/front.jpg">
+          <label for="productImage">Front Photo *</label>
+<input
+    id="productImage"
+    type="file"
+    accept="image/*"
+    required
+>
+
+<img id="frontPreview"
+     style="width:120px;display:none;margin-bottom:15px;">
+
+<label for="productBackImage">Back Photo</label>
+<input
+    id="productBackImage"
+    type="file"
+    accept="image/*"
+>
+
+<img id="backPreview"
+     style="width:120px;display:none;margin-bottom:15px;">
 
           <label for="productBackImage">Back image URL</label>
           <input id="productBackImage" type="url" maxlength="1000"

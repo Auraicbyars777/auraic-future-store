@@ -245,95 +245,95 @@ app.get('/api/products', (req, res) => {
 // ========================================
 // ADMIN LOGIN
 // ========================================
-
+// ADMIN LOGIN
 app.post('/api/admin/login', (req, res, next) => {
-  try {
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
-    const now = Date.now();
-    const windowStart = now - 15 * 60 * 1000;
+try {
+const username = req.body?.username;
+const password = req.body?.password;
 
-    db.prepare(
-      'DELETE FROM login_attempts WHERE attempted_at < ?'
-    ).run(windowStart);
+if (
+  typeof username !== 'string' ||
+  typeof password !== 'string' ||
+  username.length > 100 ||
+  password.length > 200
+) {
+  return res.status(400).json({ error: 'Invalid login details.' });
+}
 
-    const attempts = db.prepare(`
-      SELECT COUNT(*) AS count
-      FROM login_attempts
-      WHERE ip = ? AND attempted_at >= ?
-    `).get(ip).count;
+const ip = req.ip || req.socket.remoteAddress || 'unknown';
+const now = Date.now();
+const windowStart = now - 15 * 60 * 1000;
 
-    if (attempts >= 10) {
-      return res.status(429).json({
-        error: 'Too many login attempts. Try again later.'
-      });
-    }
+db.prepare(
+  'DELETE FROM login_attempts WHERE attempted_at < ?'
+).run(windowStart);
 
-    const username = req.body.username;
-    const password = req.body.password;
+const attempts = db.prepare(`
+  SELECT COUNT(*) AS count
+  FROM login_attempts
+  WHERE ip = ? AND attempted_at >= ?
+`).get(ip, windowStart).count;
 
-    if (
-      typeof username !== 'string' ||
-      typeof password !== 'string' ||
-      username.length > 100 ||
-      password.length > 200
-    ) {
-      return res.status(400).json({
-        error: 'Invalid login details.'
-      });
-    }
+if (attempts >= 10) {
+  return res.status(429).json({
+    error: 'Too many attempts. Try again later.'
+  });
+}
 
-    const validUsername = username === ADMIN_USERNAME;
+const validUsername = username === ADMIN_USERNAME;
+const validPassword = bcrypt.compareSync(
+  password,
+  ADMIN_PASSWORD_HASH
+);
 
-    const validPassword = bcrypt.compareSync(
-      password,
-      ADMIN_PASSWORD_HASH
-    );
+if (!validUsername || !validPassword) {
+  db.prepare(`
+    INSERT INTO login_attempts (ip, attempted_at)
+    VALUES (?, ?)
+  `).run(ip, now);
 
-    if (!validUsername || !validPassword) {
-      db.prepare(`
-        INSERT INTO login_attempts (ip, attempted_at)
-        VALUES (?, ?)
-      `).run(ip, now);
+  return res.status(401).json({
+    error: 'Incorrect username or password.'
+  });
+}
 
-      return res.status(401).json({
-        error: 'Incorrect username or password.'
-      });
-    }
+req.session.regenerate((err) => {
+  if (err) return next(err);
 
-    req.session.regenerate((err) => {
-      if (err) return next(err);
+  req.session.admin = true;
 
-      req.session.admin = true;
+  req.session.save((saveError) => {
+    if (saveError) return next(saveError);
 
-      req.session.save((saveError) => {
-        if (saveError) return next(saveError);
-
-        res.json({
-          ok: true,
-          message: 'Admin login successful.'
-        });
-      });
+    res.json({
+      ok: true,
+      message: 'Admin login successful.'
     });
-
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/admin/logout', adminOnly, (req, res, next) => {
-  req.session.destroy((err) => {
-    if (err) return next(err);
-
-    res.clearCookie('auraic.sid');
-
-    res.json({ ok: true });
   });
 });
 
-app.get('/api/admin/me', adminOnly, (req, res) => {
-  res.json({ authenticated: true });
+} catch (error) {
+next(error);
+}
 });
 
+// ADMIN SESSION CHECK
+app.get('/api/admin/me', (req, res) => {
+res.json({
+authenticated: Boolean(req.session?.admin)
+});
+});
+
+// ADMIN LOGOUT
+app.post('/api/admin/logout', adminOnly, (req, res, next) => {
+req.session.destroy((err) => {
+if (err) return next(err);
+
+res.clearCookie('auraic.sid');
+res.json({ ok: true });
+
+});
+});
 // ========================================
 // ADMIN PRODUCT MANAGEMENT
 // ========================================

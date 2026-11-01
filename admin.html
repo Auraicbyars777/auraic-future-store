@@ -448,41 +448,67 @@ previewImage("productBackImage", "backPreview");
     $("refreshOrders").addEventListener("click", loadOrders);
 
     // CREATE / UPDATE PRODUCT
-    $("productForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      clearMessage("dashboardMessage");
+ $("productForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    clearMessage("dashboardMessage");
 
-      const id = $("productId").value;
+    const id = $("productId").value;
+    const frontFile = $("productImage").files[0];
+    const backFile = $("productBackImage").files[0];
 
-      const product = {
-        name: $("productName").value.trim(),
-        description: $("productDescription").value.trim(),
-        price: Number($("productPrice").value),
-        image: $("productImage").value.trim(),
-        back_image: $("productBackImage").value.trim(),
-        color: $("productColor").value.trim(),
-        sizes: $("productSizes").value
-          .split(",").map(value => value.trim()).filter(Boolean),
-        stock: Number($("productStock").value)
-      };
+    const existingProduct = id
+        ? products.find(p => String(p.id) === String(id))
+        : null;
 
-      try {
+    try {
+        let frontImage = existingProduct?.image || "";
+        let backImage = existingProduct?.back_image || "";
+
+        if (frontFile) {
+            message("dashboardMessage", "Uploading front photo...");
+            frontImage = await uploadToCloudinary(frontFile);
+        }
+
+        if (!frontImage) {
+            throw new Error("Please select a front photo.");
+        }
+
+        if (backFile) {
+            message("dashboardMessage", "Uploading back photo...");
+            backImage = await uploadToCloudinary(backFile);
+        }
+
+        const product = {
+            name: $("productName").value.trim(),
+            description: $("productDescription").value.trim(),
+            price: Number($("productPrice").value),
+            image: frontImage,
+            back_image: backImage,
+            color: $("productColor").value.trim(),
+            sizes: $("productSizes").value
+                .split(",").map(value => value.trim()).filter(Boolean),
+            stock: Number($("productStock").value)
+        };
+
         const url = id
-          ? "/api/admin/products/" + encodeURIComponent(id)
-          : "/api/admin/products";
+            ? "/api/admin/products/" + encodeURIComponent(id)
+            : "/api/admin/products";
+
+        message("dashboardMessage", "Saving product...");
 
         await api(url, {
-          method: id ? "PUT" : "POST",
-          body: JSON.stringify(product)
+            method: id ? "PUT" : "POST",
+            body: JSON.stringify(product)
         });
 
         resetProductForm();
-        message("dashboardMessage", "Product saved successfully.");
+        message("dashboardMessage", "Product saved successfully!");
         await loadProducts();
-      } catch (error) {
+
+    } catch (error) {
         message("dashboardMessage", error.message);
-      }
-    });
+    }
+});
 
     // LOAD PRODUCTS
     async function loadProducts() {

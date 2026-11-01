@@ -1,104 +1,180 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-const menuToggle = document.getElementById('menuToggle');
-const navLinks = document.getElementById('navLinks');
-const cartButton = document.getElementById('cartButton');
-const cartPanel = document.getElementById('cartPanel');
-const closeCart = document.getElementById('closeCart');
-const overlay = document.getElementById('overlay');
-const cartCount = document.getElementById('cartCount');
-const year = document.getElementById('year');
 
-// Automatically update the copyright year.
-if (year) {
-year.textContent = new Date().getFullYear();
-}
+    const API_URL = 'https://auraic-future-store.onrender.com/api/products';
 
-// Mobile navigation menu.
-if (menuToggle && navLinks) {
-menuToggle.addEventListener('click', () => {
-const isOpen = navLinks.classList.toggle('show');
-menuToggle.setAttribute('aria-expanded', String(isOpen));
-menuToggle.textContent = isOpen ? '✕' : '☰';
-});
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+    const cartButton = document.getElementById('cartButton');
+    const cartPanel = document.getElementById('cartPanel');
+    const closeCart = document.getElementById('closeCart');
+    const overlay = document.getElementById('overlay');
+    const cartCount = document.getElementById('cartCount');
+    const year = document.getElementById('year');
+    const productGrid = document.getElementById('productGrid');
 
-navLinks.querySelectorAll('a').forEach((link) => {
-  link.addEventListener('click', () => {
-    navLinks.classList.remove('show');
-    menuToggle.setAttribute('aria-expanded', 'false');
-    menuToggle.textContent = '☰';
-  });
-});
+    if (year) {
+        year.textContent = new Date().getFullYear();
+    }
 
-}
+    // Mobile menu
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            const opened = navLinks.classList.toggle('show');
+            menuToggle.textContent = opened ? '✕' : '☰';
+            menuToggle.setAttribute('aria-expanded', String(opened));
+        });
 
-// Open and close the shopping cart panel.
-function openCart() {
-if (!cartPanel || !overlay) return;
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('show');
+                menuToggle.textContent = '☰';
+            });
+        });
+    }
 
-cartPanel.classList.add('open');
-overlay.classList.add('show');
-document.body.style.overflow = 'hidden';
+    // Shopping cart panel
+    function openCart() {
+        if (!cartPanel || !overlay) return;
+        cartPanel.classList.add('open');
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
 
-if (closeCart) {
-  closeCart.focus();
-}
+    function closeCartPanel() {
+        if (!cartPanel || !overlay) return;
+        cartPanel.classList.remove('open');
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
+    }
 
-}
+    cartButton?.addEventListener('click', openCart);
+    closeCart?.addEventListener('click', closeCartPanel);
+    overlay?.addEventListener('click', closeCartPanel);
 
-function closeCartPanel() {
-if (!cartPanel || !overlay) return;
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            closeCartPanel();
+            navLinks?.classList.remove('show');
+            if (menuToggle) menuToggle.textContent = '☰';
+        }
+    });
 
-cartPanel.classList.remove('open');
-overlay.classList.remove('show');
-document.body.style.overflow = '';
+    // Load products from database
+    async function loadProducts() {
 
-if (cartButton) {
-  cartButton.focus();
-}
+        if (!productGrid) return;
 
-}
+        productGrid.innerHTML =
+            '<p style="color:#46a6ff;padding:20px">Loading AURAIC collection...</p>';
 
-if (cartButton) {
-cartButton.addEventListener('click', openCart);
-}
+        try {
 
-if (closeCart) {
-closeCart.addEventListener('click', closeCartPanel);
-}
+            const response = await fetch(API_URL, {
+                cache: 'no-store'
+            });
 
-if (overlay) {
-overlay.addEventListener('click', closeCartPanel);
-}
+            if (!response.ok) {
+                throw new Error('Product server error');
+            }
 
-// Allow the Escape key to close the cart.
-document.addEventListener('keydown', (event) => {
-if (event.key === 'Escape') {
-closeCartPanel();
+            const data = await response.json();
 
-  if (navLinks && menuToggle) {
-    navLinks.classList.remove('show');
-    menuToggle.setAttribute('aria-expanded', 'false');
-    menuToggle.textContent = '☰';
-  }
-}
+            const products = (data.products || []).filter(product =>
+                product.active === true &&
+                Number(product.stock) > 0
+            );
 
-});
+            productGrid.innerHTML = '';
 
-// Close the cart when the screen becomes wider.
-window.addEventListener('resize', () => {
-if (window.innerWidth > 650 && navLinks && menuToggle) {
-navLinks.classList.remove('show');
-menuToggle.setAttribute('aria-expanded', 'false');
-menuToggle.textContent = '☰';
-}
-});
+            if (products.length === 0) {
+                productGrid.innerHTML =
+                    '<p style="color:white;padding:20px">No products available right now.</p>';
+                return;
+            }
 
-// Placeholder until real products and cart functionality are connected.
-if (cartCount) {
-cartCount.textContent = '0';
-}
+            products.forEach((product, index) => {
 
-console.log('AURAIC Future Store — interface loaded successfully.');
+                const card = document.createElement('article');
+                card.className = 'product-card';
+
+                const front = product.image || '';
+                const back = product.back_image || '';
+
+                card.innerHTML = `
+                    <div class="product-image"
+                         style="display:flex;flex-direction:column;gap:8px;padding:8px">
+
+                        <span>A/${String(index + 1).padStart(2, '0')}</span>
+
+                        <img
+                            src="${escapeAttribute(front)}"
+                            alt="${escapeAttribute(product.name)} front"
+                            style="width:100%;height:220px;object-fit:contain"
+                            onerror="this.style.display='none'">
+
+                        ${back ? `
+                        <img
+                            src="${escapeAttribute(back)}"
+                            alt="${escapeAttribute(product.name)} back"
+                            style="width:100%;height:180px;object-fit:contain"
+                            onerror="this.style.display='none'">
+                        ` : ''}
+
+                    </div>
+
+                    <div class="product-info">
+                        <div>
+                            <h3>${escapeHTML(product.name)}</h3>
+                            <p>${escapeHTML(product.color || 'AURAIC Collection')}</p>
+                        </div>
+
+                        <strong>₹${Number(product.price).toLocaleString('en-IN')}</strong>
+                    </div>
+
+                    <p class="coming-soon">
+                        ${product.stock} AVAILABLE
+                    </p>
+                `;
+
+                productGrid.appendChild(card);
+
+            });
+
+            const note = document.querySelector('.demo-note');
+            if (note) note.style.display = 'none';
+
+            console.log('AURAIC products loaded:', products.length);
+
+        } catch (error) {
+
+            console.error('AURAIC product error:', error);
+
+            productGrid.innerHTML = `
+                <p style="color:#ff7777;padding:20px">
+                    Unable to load products. Please refresh the page.
+                </p>
+            `;
+        }
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[char]);
+    }
+
+    function escapeAttribute(value) {
+        return escapeHTML(value);
+    }
+
+    loadProducts();
+
+    console.log('AURAIC Future Store loaded');
+
 });

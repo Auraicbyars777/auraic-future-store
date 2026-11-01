@@ -2,22 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#071426">
-  <title>AURAIC | Admin Panel</title>
+  <title>AURAIC | Admin Dashboard</title>
 
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       background: #071426;
       color: #fff;
-      min-height: 100vh;
     }
 
     button, input, textarea, select {
@@ -25,21 +23,21 @@
     }
 
     button {
-      cursor: pointer;
       border: 0;
       border-radius: 8px;
       padding: 12px 16px;
-      font-weight: bold;
+      cursor: pointer;
+      font-weight: 700;
     }
 
     input, textarea, select {
       width: 100%;
+      margin: 7px 0 15px;
       padding: 12px;
-      margin: 7px 0 14px;
-      background: #101f33;
-      color: white;
       border: 1px solid #30435d;
       border-radius: 8px;
+      background: #101f33;
+      color: #fff;
     }
 
     label {
@@ -52,14 +50,14 @@
       color: #061426;
     }
 
-    .danger {
-      background: #ff5364;
-      color: white;
-    }
-
     .secondary {
       background: #24364d;
-      color: white;
+      color: #fff;
+    }
+
+    .danger {
+      background: #ff5364;
+      color: #fff;
     }
 
     .hidden {
@@ -69,64 +67,51 @@
     .container {
       width: min(1100px, 92%);
       margin: auto;
-      padding: 28px 0 60px;
+      padding: 25px 0 60px;
     }
 
     .brand {
       color: #58a6ff;
-      letter-spacing: 5px;
-      font-size: 25px;
+      font-size: 26px;
       font-weight: 900;
+      letter-spacing: 5px;
     }
 
-    .subtitle {
+    .muted {
       color: #9aacc4;
-      margin-top: 8px;
-      font-size: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     .card {
-      background: #0d1b2e;
+      margin-top: 22px;
+      padding: 22px;
       border: 1px solid #24364d;
       border-radius: 14px;
-      padding: 22px;
-      margin-top: 22px;
+      background: #0d1b2e;
     }
 
     .login {
-      max-width: 420px;
-      margin: 80px auto;
-    }
-
-    h2 {
-      font-size: 20px;
-      margin-bottom: 18px;
-    }
-
-    h3 {
-      margin-bottom: 12px;
+      max-width: 430px;
+      margin: 70px auto;
     }
 
     .topbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 15px;
       flex-wrap: wrap;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-    }
-
     .product, .order {
-      background: #101f33;
+      margin-top: 14px;
+      padding: 16px;
       border: 1px solid #30435d;
       border-radius: 10px;
-      padding: 16px;
-      margin-top: 14px;
+      background: #101f33;
       overflow-wrap: anywhere;
     }
 
@@ -134,52 +119,45 @@
       width: 100%;
       height: 180px;
       object-fit: contain;
-      background: #fff;
+      background: white;
       border-radius: 8px;
       margin-bottom: 12px;
     }
 
-    .muted {
-      color: #9aacc4;
-      font-size: 13px;
-      line-height: 1.6;
+    .price {
+      color: #75b7ff;
+      font-size: 20px;
+      font-weight: bold;
     }
 
     .actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 9px;
       margin-top: 12px;
     }
 
     .message {
       padding: 12px;
-      border-radius: 8px;
       margin-top: 12px;
+      border-radius: 8px;
       background: #132a43;
       color: #b8d9ff;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
 
-    .price {
-      color: #75b7ff;
-      font-size: 19px;
-      font-weight: bold;
-      margin: 8px 0;
-    }
-
-    @media (max-width: 700px) {
-      .grid {
-        grid-template-columns: 1fr;
+    @media (max-width: 600px) {
+      .container {
+        width: 94%;
       }
 
-      .container {
-        padding-top: 20px;
+      .card {
+        padding: 16px;
       }
 
       .login {
-        margin-top: 45px;
+        margin-top: 35px;
       }
     }
   </style>
@@ -188,12 +166,12 @@
 <body>
   <main class="container">
 
-    <!-- LOGIN -->
+    <!-- ADMIN LOGIN -->
     <section id="loginSection" class="card login">
       <div class="brand">AURAIC</div>
-      <p class="subtitle">SECURE ADMIN ACCESS</p>
+      <p class="muted">SECURE ADMIN ACCESS</p>
 
-      <form id="loginForm" style="margin-top:25px">
+      <form id="loginForm">
         <label for="username">Admin username</label>
         <input id="username" autocomplete="username" required>
 
@@ -201,20 +179,20 @@
         <input id="password" type="password"
                autocomplete="current-password" required>
 
-        <button class="primary" style="width:100%" type="submit">
-          LOGIN TO DASHBOARD
+        <button class="primary" type="submit" style="width:100%">
+          LOGIN
         </button>
       </form>
 
       <div id="loginMessage" class="message hidden"></div>
     </section>
 
-    <!-- DASHBOARD -->
+    <!-- ADMIN DASHBOARD -->
     <section id="dashboard" class="hidden">
       <header class="topbar">
         <div>
           <div class="brand">AURAIC</div>
-          <p class="subtitle">ADMIN DASHBOARD</p>
+          <p class="muted">ADMIN DASHBOARD</p>
         </div>
 
         <button id="logoutButton" class="danger">Logout</button>
@@ -222,8 +200,9 @@
 
       <div id="dashboardMessage" class="message hidden"></div>
 
+      <!-- ADD / EDIT PRODUCT -->
       <section class="card">
-        <h2 id="formHeading">Add New Product</h2>
+        <h2 id="formHeading">Add Product</h2>
 
         <form id="productForm">
           <input id="productId" type="hidden">
@@ -231,7 +210,7 @@
           <label for="productName">Product name *</label>
           <input id="productName" maxlength="120" required>
 
-          <label for="productPrice">Price in ₹ *</label>
+          <label for="productPrice">Price (₹) *</label>
           <input id="productPrice" type="number"
                  min="0.01" step="0.01" required>
 
@@ -254,85 +233,72 @@
           <input id="productSizes" maxlength="200"
                  placeholder="S, M, L, XL">
 
-          <label for="productStock">Stock quantity</label>
-          <input id="productStock" type="number" min="0" step="1" value="0">
+          <label for="productStock">Stock quantity *</label>
+          <input id="productStock" type="number" min="0"
+                 step="1" value="0" required>
 
           <div class="actions">
             <button class="primary" type="submit">Save Product</button>
-            <button class="secondary hidden" id="cancelEdit"
+            <button id="cancelEdit" class="secondary hidden"
                     type="button">Cancel Edit</button>
           </div>
         </form>
       </section>
 
+      <!-- PRODUCTS -->
       <section class="card">
         <h2>Products</h2>
-        <div id="productsList">Loading products...</div>
+        <button id="refreshProducts" class="secondary" type="button">
+          Refresh Products
+        </button>
+        <div id="productsList" class="muted">Loading products...</div>
       </section>
 
+      <!-- ORDERS -->
       <section class="card">
         <h2>Customer Orders</h2>
         <button id="refreshOrders" class="secondary" type="button">
           Refresh Orders
         </button>
-        <div id="ordersList">Click refresh to load orders.</div>
+        <div id="ordersList" class="muted">Loading orders...</div>
       </section>
     </section>
   </main>
 
   <script>
-    const $ = (id) => document.getElementById(id);
+    const $ = id => document.getElementById(id);
 
-    let csrfToken = "";
     let products = [];
 
-    function showMessage(id, text) {
-      const el = $(id);
-      el.textContent = text;
-      el.classList.remove("hidden");
-    }
-
-    function hideMessage(id) {
-      $(id).classList.add("hidden");
-    }
-
     async function api(url, options = {}) {
-      const headers = {
-        ...(options.body ? { "Content-Type": "application/json" } : {}),
-        ...(options.method && options.method !== "GET"
-          ? { "X-CSRF-Token": csrfToken } : {}),
-        ...(options.headers || {})
-      };
-
       const response = await fetch(url, {
         ...options,
-        headers,
-        credentials: "same-origin"
+        credentials: "same-origin",
+        headers: {
+          ...(options.body
+            ? { "Content-Type": "application/json" }
+            : {}),
+          ...(options.headers || {})
+        }
       });
 
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || "Request failed");
+        throw new Error(data.error || "Request failed.");
       }
 
       return data;
     }
 
-    async function checkLogin() {
-      try {
-        const data = await api("/api/admin/me");
+    function message(id, text) {
+      $(id).textContent = text;
+      $(id).classList.remove("hidden");
+    }
 
-        if (data.csrfToken) csrfToken = data.csrfToken;
-
-        if (data.authenticated) {
-          showDashboard();
-        } else {
-          showLogin();
-        }
-      } catch {
-        showLogin();
-      }
+    function clearMessage(id) {
+      $(id).textContent = "";
+      $(id).classList.add("hidden");
     }
 
     function showLogin() {
@@ -343,16 +309,31 @@
     function showDashboard() {
       $("loginSection").classList.add("hidden");
       $("dashboard").classList.remove("hidden");
+
       loadProducts();
       loadOrders();
     }
 
-    $("loginForm").addEventListener("submit", async (event) => {
+    async function checkLogin() {
+      try {
+        const data = await api("/api/admin/me");
+
+        if (data.authenticated === true) {
+          showDashboard();
+        } else {
+          showLogin();
+        }
+      } catch {
+        showLogin();
+      }
+    }
+
+    $("loginForm").addEventListener("submit", async event => {
       event.preventDefault();
-      hideMessage("loginMessage");
+      clearMessage("loginMessage");
 
       try {
-        const result = await api("/api/admin/login", {
+        await api("/api/admin/login", {
           method: "POST",
           body: JSON.stringify({
             username: $("username").value.trim(),
@@ -360,12 +341,10 @@
           })
         });
 
-        if (result.csrfToken) csrfToken = result.csrfToken;
-
         $("password").value = "";
         await checkLogin();
       } catch (error) {
-        showMessage("loginMessage", error.message);
+        message("loginMessage", error.message);
       }
     });
 
@@ -373,10 +352,9 @@
       try {
         await api("/api/admin/logout", { method: "POST" });
       } catch (error) {
-        showMessage("dashboardMessage", error.message);
+        message("dashboardMessage", error.message);
       }
 
-      csrfToken = "";
       showLogin();
     });
 
@@ -384,57 +362,60 @@
       $("productForm").reset();
       $("productId").value = "";
       $("productStock").value = "0";
-      $("formHeading").textContent = "Add New Product";
+      $("formHeading").textContent = "Add Product";
       $("cancelEdit").classList.add("hidden");
     }
 
     $("cancelEdit").addEventListener("click", resetProductForm);
+    $("refreshProducts").addEventListener("click", loadProducts);
+    $("refreshOrders").addEventListener("click", loadOrders);
 
-    $("productForm").addEventListener("submit", async (event) => {
+    // CREATE / UPDATE PRODUCT
+    $("productForm").addEventListener("submit", async event => {
       event.preventDefault();
+      clearMessage("dashboardMessage");
 
       const id = $("productId").value;
 
       const product = {
         name: $("productName").value.trim(),
-        price: Number($("productPrice").value),
         description: $("productDescription").value.trim(),
+        price: Number($("productPrice").value),
         image: $("productImage").value.trim(),
-        back_Image: $("productBackImage").value.trim(),
+        back_image: $("productBackImage").value.trim(),
         color: $("productColor").value.trim(),
         sizes: $("productSizes").value
-          .split(",").map(s => s.trim()).filter(Boolean),
+          .split(",").map(value => value.trim()).filter(Boolean),
         stock: Number($("productStock").value)
       };
 
       try {
-        if (id) {
-          await api("/api/admin/products/" + encodeURIComponent(id), {
-            method: "PUT",
-            body: JSON.stringify(product)
-          });
-        } else {
-          await api("/api/admin/products", {
-            method: "POST",
-            body: JSON.stringify(product)
-          });
-        }
+        const url = id
+          ? "/api/admin/products/" + encodeURIComponent(id)
+          : "/api/admin/products";
+
+        await api(url, {
+          method: id ? "PUT" : "POST",
+          body: JSON.stringify(product)
+        });
 
         resetProductForm();
-        showMessage("dashboardMessage", "Product saved successfully.");
+        message("dashboardMessage", "Product saved successfully.");
         await loadProducts();
       } catch (error) {
-        showMessage("dashboardMessage", error.message);
+        message("dashboardMessage", error.message);
       }
     });
 
+    // LOAD PRODUCTS
     async function loadProducts() {
       $("productsList").textContent = "Loading products...";
 
       try {
         const data = await api("/api/products");
-        products = data.products || data;
-        if (!Array.isArray(products)) products = [];
+        products = Array.isArray(data.products)
+          ? data.products
+          : Array.isArray(data) ? data : [];
 
         renderProducts();
       } catch (error) {
@@ -448,11 +429,11 @@
       list.replaceChildren();
 
       if (!products.length) {
-        list.textContent = "No products yet. Add your first product above.";
+        list.textContent = "No active products found.";
         return;
       }
 
-      products.forEach((product) => {
+      products.forEach(product => {
         const card = document.createElement("article");
         card.className = "product";
 
@@ -467,17 +448,23 @@
 
         const title = document.createElement("h3");
         title.textContent = product.name || "Untitled product";
-        card.appendChild(title);
 
         const price = document.createElement("p");
         price.className = "price";
-        price.textContent = "₹" + Number(product.price || 0).toLocaleString("en-IN");
-        card.appendChild(price);
+        price.textContent =
+          "₹" + Number(product.price || 0).toLocaleString("en-IN");
 
-        const description = document.createElement("p");
-        description.className = "muted";
-        description.textContent = product.description || "";
-        card.appendChild(description);
+        const details = document.createElement("p");
+        details.className = "muted";
+        details.textContent =
+          (product.description || "") +
+          "\nColour: " + (product.color || "—") +
+          "\nSizes: " + (
+            Array.isArray(product.sizes)
+              ? product.sizes.join(", ")
+              : product.sizes || "—"
+          ) +
+          "\nStock: " + (product.stock ?? 0);
 
         const actions = document.createElement("div");
         actions.className = "actions";
@@ -489,11 +476,11 @@
 
         const remove = document.createElement("button");
         remove.className = "danger";
-        remove.textContent = "Delete";
+        remove.textContent = "Remove";
         remove.addEventListener("click", () => deleteProduct(product.id));
 
         actions.append(edit, remove);
-        card.appendChild(actions);
+        card.append(title, price, details, actions);
         list.appendChild(card);
       });
     }
@@ -504,115 +491,135 @@
       $("productPrice").value = product.price ?? "";
       $("productDescription").value = product.description || "";
       $("productImage").value = product.image || "";
-      $("productBackImage").value = product.backImage || "";
+      $("productBackImage").value = product.back_image || "";
       $("productColor").value = product.color || "";
+
       $("productSizes").value = Array.isArray(product.sizes)
         ? product.sizes.join(", ")
-        : (product.sizes || "");
-      $("productStock").value = product.stock ?? 0;
+        : product.sizes || "";
 
+      $("productStock").value = product.stock ?? 0;
       $("formHeading").textContent = "Edit Product";
       $("cancelEdit").classList.remove("hidden");
+
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    // SOFT DELETE PRODUCT
     async function deleteProduct(id) {
-      if (!confirm("Delete this product permanently?")) return;
+      if (!confirm("Remove this product from the store?")) return;
 
       try {
         await api("/api/admin/products/" + encodeURIComponent(id), {
           method: "DELETE"
         });
-        showMessage("dashboardMessage", "Product deleted.");
+
+        message("dashboardMessage", "Product removed.");
         await loadProducts();
       } catch (error) {
-        showMessage("dashboardMessage", error.message);
+        message("dashboardMessage", error.message);
       }
     }
 
-    $("refreshOrders").addEventListener("click", loadOrders);
-
+    // LOAD ORDERS
     async function loadOrders() {
       $("ordersList").textContent = "Loading orders...";
 
       try {
         const data = await api("/api/admin/orders");
-        const orders = data.orders || data;
-        renderOrders(Array.isArray(orders) ? orders : []);
+        const orders = Array.isArray(data.orders) ? data.orders : [];
+        renderOrders(orders);
       } catch (error) {
         $("ordersList").textContent =
           "Could not load orders: " + error.message;
       }
     }
 
+    // DISPLAY ORDERS + STATUS UPDATE
     function renderOrders(orders) {
       const list = $("ordersList");
       list.replaceChildren();
 
       if (!orders.length) {
-        list.textContent = "No orders found.";
+        list.textContent = "No customer orders found.";
         return;
       }
 
-      orders.forEach((order) => {
+      const statuses = [
+        "NEW",
+        "CONFIRMED",
+        "PACKED",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED"
+      ];
+
+      orders.forEach(order => {
         const card = document.createElement("article");
         card.className = "order";
 
-        const heading = document.createElement("h3");
-        heading.textContent = "Order #" + (order.id ?? order.orderCode ?? "");
-        card.appendChild(heading);
+        const title = document.createElement("h3");
+        title.textContent =
+          "Order " + (order.order_code || ("#" + order.id));
 
         const details = document.createElement("p");
         details.className = "muted";
         details.textContent =
-          "Customer: " + (order.customerName || order.name || "—") +
+          "Customer: " + (order.customer_name || "—") +
           "\nPhone: " + (order.phone || "—") +
           "\nAddress: " + (order.address || "—") +
-          "\nPayment: " + (order.paymentMethod || order.payment_method || "—") +
-          "\nStatus: " + (order.status || "pending") +
-          "\nTotal: ₹" + Number(order.total || 0).toLocaleString("en-IN");
+          "\nPayment method: " + (order.payment_method || "—") +
+          "\nPayment status: " + (order.payment_status || "PENDING") +
+          "\nOrder status: " + (order.order_status || "NEW") +
+          "\nTotal: ₹" +
+          Number(order.total || 0).toLocaleString("en-IN");
 
-        details.style.whiteSpace = "pre-line";
-        card.appendChild(details);
+        const items = document.createElement("p");
+        items.className = "muted";
 
-        if (order.items) {
-          const items = document.createElement("p");
-          items.className = "muted";
-          items.textContent = "Items: " +
-            (typeof order.items === "string"
-              ? order.items
-              : JSON.stringify(order.items));
-          card.appendChild(items);
-        
+        const orderItems = Array.isArray(order.items)
+          ? order.items
+          : Array.isArray(order.items_json)
+            ? order.items_json
+            : [];
+
+        items.textContent = "Items: " + orderItems.map(item =>
+          `${item.name} × ${item.quantity}`
+        ).join(", ");
 
         const select = document.createElement("select");
-        ["NEW", "CONFIRMED", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"]
-          .forEach(status => {
-            const option = document.createElement("option");
-            option.value = status;
-            option.textContent = status;
-            option.selected = status === (order.status || "pending");
-            select.appendChild(option);
-          });
+
+        statuses.forEach(status => {
+          const option = document.createElement("option");
+          option.value = status;
+          option.textContent = status;
+          option.selected = status === (order.order_status || "NEW");
+          select.appendChild(option);
+        });
 
         const update = document.createElement("button");
         update.className = "primary";
         update.textContent = "Update Status";
+
         update.addEventListener("click", async () => {
           try {
-            await api("/api/admin/orders/" +
-              encodeURIComponent(order.id) + "/status", {
+            await api(
+              "/api/admin/orders/" +
+              encodeURIComponent(order.id) + "/status",
+              {
                 method: "PATCH",
                 body: JSON.stringify({ status: select.value })
-              });
-            showMessage("dashboardMessage", "Order status updated.");
+              }
+            );
+
+            message("dashboardMessage", "Order status updated.");
             await loadOrders();
           } catch (error) {
-            showMessage("dashboardMessage", error.message);
+            message("dashboardMessage", error.message);
           }
         });
 
-        card.append(select, update);
+        card.append(title, details, items, select, update);
         list.appendChild(card);
       });
     }
@@ -620,4 +627,6 @@
     checkLogin();
   </script>
 </body>
-  </html>
+</html>
+      
+  

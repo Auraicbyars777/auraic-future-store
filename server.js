@@ -648,9 +648,14 @@ app.use('/api', (req, res) => {
     error: 'API route not found.'
   });
 });
-
+// AURAIC ADMIN PAGE
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'), (error) => {
+  res.sendFile(path.join(__dirname, 'index.html'),app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+}); (error) => {
     if (error && !res.headersSent) {
       res.status(404).send('AURAIC homepage not found.');
     }

@@ -583,10 +583,10 @@
               ? order.items
               : JSON.stringify(order.items));
           card.appendChild(items);
-        }
+        
 
         const select = document.createElement("select");
-        ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]
+        ["NEW", "CONFIRMED", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"]
           .forEach(status => {
             const option = document.createElement("option");
             option.value = status;

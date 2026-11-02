@@ -147,6 +147,16 @@
       overflow-wrap: anywhere;
     }
 
+    .image-preview {
+      width: 120px;
+      max-height: 150px;
+      object-fit: contain;
+      display: none;
+      margin-bottom: 15px;
+      background: white;
+      border-radius: 8px;
+    }
+
     @media (max-width: 600px) {
       .container {
         width: 94%;
@@ -219,29 +229,14 @@
                     maxlength="2000"></textarea>
 
           <label for="productImage">Front Photo *</label>
-<input
-    id="productImage"
-    type="file"
-    accept="image/*"
-    required
->
+          <input id="productImage" type="file"
+                 accept="image/*">
+          <img id="frontPreview" class="image-preview" alt="Front preview">
 
-<img id="frontPreview"
-     style="width:120px;display:none;margin-bottom:15px;">
-
-<label for="productBackImage">Back Photo</label>
-<input
-    id="productBackImage"
-    type="file"
-    accept="image/*"
->
-
-<img id="backPreview"
-     style="width:120px;display:none;margin-bottom:15px;">
-
-          <label for="productBackImage">Back image URL</label>
-          <input id="productBackImage" type="url" maxlength="1000"
-                 placeholder="https://example.com/back.jpg">
+          <label for="productBackImage">Back Photo</label>
+          <input id="productBackImage" type="file"
+                 accept="image/*">
+          <img id="backPreview" class="image-preview" alt="Back preview">
 
           <label for="productColor">Colour</label>
           <input id="productColor" maxlength="100">
@@ -281,455 +276,356 @@
       </section>
     </section>
   </main>
+      <script>
+const $ = id => document.getElementById(id);
 
-  <script>
-    const $ = id => document.getElementById(id);
-
-    let products = [];
-    // AURAIC CLOUDINARY IMAGE UPLOAD
+let products = [];
+let editingFrontImage = "";
+let editingBackImage = "";
 
 const CLOUD_NAME = "vdqrpjye";
 const UPLOAD_PRESET = "auraic_upload";
 
-async function uploadToCloudinary(file) {
+const API_BASE = "";
 
-    if (!file) return "";
-
-    if (!file.type.startsWith("image/")) {
-        throw new Error("Please select an image.");
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-        throw new Error("Image must be smaller than 5 MB.");
-    }
-
-    const formData = new FormData();
-
-    formData.append("file", file);
-    formData.append("upload_preset", UPLOAD_PRESET);
-    formData.append("folder", "auraic-products");
-
-    const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.error?.message || "Image upload failed.");
-    }
-
-    return data.secure_url;
+function showMessage(id, text) {
+  const el = $(id);
+  el.textContent = text;
+  el.classList.remove("hidden");
 }
 
+function clearMessage(id) {
+  $(id).textContent = "";
+  $(id).classList.add("hidden");
+}
+
+async function api(url, options = {}) {
+  const response = await fetch(API_BASE + url, {
+    ...options,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || data.error || "Request failed");
+  }
+
+  return data;
+}
+
+// CLOUDINARY PHOTO UPLOAD
+async function uploadToCloudinary(file) {
+  if (!file) return "";
+
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Please select a valid image.");
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Image must be smaller than 5 MB.");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("folder", "auraic-products");
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Photo upload failed.");
+  }
+
+  return data.secure_url;
+}
 
 // IMAGE PREVIEW
+function setupPreview(inputId, previewId) {
+  $(inputId).addEventListener("change", event => {
+    const file = event.target.files[0];
+    const preview = $(previewId);
 
-function previewImage(inputId, previewId) {
+    if (!file) return;
 
-    $(inputId).addEventListener("change", event => {
-
-        const file = event.target.files[0];
-        const preview = $(previewId);
-
-        if (!file) return;
-
-        preview.src = URL.createObjectURL(file);
-        preview.classList.remove("hidden");
-
-    });
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+  });
 }
 
-previewImage("productImage", "frontPreview");
-previewImage("productBackImage", "backPreview");
+setupPreview("productImage", "frontPreview");
+setupPreview("productBackImage", "backPreview");
 
-    async function api(url, options = {}) {
-      const response = await fetch(url, {
-        ...options,
-        credentials: "same-origin",
-        headers: {
-          ...(options.body
-            ? { "Content-Type": "application/json" }
-            : {}),
-          ...(options.headers || {})
-        }
-      });
+// LOGIN
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMessage("loginMessage");
 
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.error || "Request failed.");
-      }
-
-      return data;
-    }
-
-    function message(id, text) {
-      $(id).textContent = text;
-      $(id).classList.remove("hidden");
-    }
-
-    function clearMessage(id) {
-      $(id).textContent = "";
-      $(id).classList.add("hidden");
-    }
-
-    function showLogin() {
-      $("loginSection").classList.remove("hidden");
-      $("dashboard").classList.add("hidden");
-    }
-
-    function showDashboard() {
-      $("loginSection").classList.add("hidden");
-      $("dashboard").classList.remove("hidden");
-
-      loadProducts();
-      loadOrders();
-    }
-
-    async function checkLogin() {
-      try {
-        const data = await api("/api/admin/me");
-
-        if (data.authenticated === true) {
-          showDashboard();
-        } else {
-          showLogin();
-        }
-      } catch {
-        showLogin();
-      }
-    }
-
-    $("loginForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      clearMessage("loginMessage");
-
-      try {
-        await api("/api/admin/login", {
-          method: "POST",
-          body: JSON.stringify({
-            username: $("username").value.trim(),
-            password: $("password").value
-          })
-        });
-
-        $("password").value = "";
-        await checkLogin();
-      } catch (error) {
-        message("loginMessage", error.message);
-      }
+  try {
+    await api("/api/admin/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: $("username").value,
+        password: $("password").value
+      })
     });
 
-    $("logoutButton").addEventListener("click", async () => {
-      try {
-        await api("/api/admin/logout", { method: "POST" });
-      } catch (error) {
-        message("dashboardMessage", error.message);
-      }
+    $("loginSection").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
 
-      showLogin();
-    });
+    await loadProducts();
+    await loadOrders();
 
-    function resetProductForm() {
-      $("productForm").reset();
-      $("productId").value = "";
-      $("productStock").value = "0";
-      $("formHeading").textContent = "Add Product";
-      $("cancelEdit").classList.add("hidden");
-    }
-
-    $("cancelEdit").addEventListener("click", resetProductForm);
-    $("refreshProducts").addEventListener("click", loadProducts);
-    $("refreshOrders").addEventListener("click", loadOrders);
-
-    // CREATE / UPDATE PRODUCT
- $("productForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    clearMessage("dashboardMessage");
-
-    const id = $("productId").value;
-    const frontFile = $("productImage").files[0];
-    const backFile = $("productBackImage").files[0];
-
-    const existingProduct = id
-        ? products.find(p => String(p.id) === String(id))
-        : null;
-
-    try {
-        let frontImage = existingProduct?.image || "";
-        let backImage = existingProduct?.back_image || "";
-
-        if (frontFile) {
-            message("dashboardMessage", "Uploading front photo...");
-            frontImage = await uploadToCloudinary(frontFile);
-        }
-
-        if (!frontImage) {
-            throw new Error("Please select a front photo.");
-        }
-
-        if (backFile) {
-            message("dashboardMessage", "Uploading back photo...");
-            backImage = await uploadToCloudinary(backFile);
-        }
-
-        const product = {
-            name: $("productName").value.trim(),
-            description: $("productDescription").value.trim(),
-            price: Number($("productPrice").value),
-            image: frontImage,
-            back_image: backImage,
-            color: $("productColor").value.trim(),
-            sizes: $("productSizes").value
-                .split(",").map(value => value.trim()).filter(Boolean),
-            stock: Number($("productStock").value)
-        };
-
-        const url = id
-            ? "/api/admin/products/" + encodeURIComponent(id)
-            : "/api/admin/products";
-
-        message("dashboardMessage", "Saving product...");
-
-        await api(url, {
-            method: id ? "PUT" : "POST",
-            body: JSON.stringify(product)
-        });
-
-        resetProductForm();
-        message("dashboardMessage", "Product saved successfully!");
-        await loadProducts();
-
-    } catch (error) {
-        message("dashboardMessage", error.message);
-    }
+  } catch (error) {
+    showMessage("loginMessage", error.message);
+  }
 });
 
-    // LOAD PRODUCTS
-    async function loadProducts() {
-      $("productsList").textContent = "Loading products...";
+// LOGOUT
+$("logoutButton").addEventListener("click", async () => {
+  try {
+    await api("/api/admin/logout", {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+  } catch (error) {
+    console.log(error);
+  }
 
-      try {
-        const data = await api("/api/products");
-        products = Array.isArray(data.products)
-          ? data.products
-          : Array.isArray(data) ? data : [];
+  $("dashboard").classList.add("hidden");
+  $("loginSection").classList.remove("hidden");
+});
 
-        renderProducts();
-      } catch (error) {
-        $("productsList").textContent =
-          "Could not load products: " + error.message;
+// LOAD PRODUCTS
+async function loadProducts() {
+  try {
+    const data = await api("/api/products");
+
+    products = Array.isArray(data)
+      ? data
+      : data.products || [];
+
+    renderProducts();
+
+  } catch (error) {
+    $("productsList").textContent = error.message;
+  }
+}
+
+// DISPLAY PRODUCTS
+function renderProducts() {
+  const list = $("productsList");
+  list.innerHTML = "";
+
+  if (!products.length) {
+    list.textContent = "No products found.";
+    return;
+  }
+
+  products.forEach(product => {
+    const item = document.createElement("div");
+    item.className = "product";
+
+    const image = document.createElement("img");
+    image.src = product.image || "";
+    image.alt = product.name || "Product";
+    image
+  // RESET PRODUCT FORM
+function resetProductForm() {
+  $("productForm").reset();
+
+  $("productId").value = "";
+  $("formHeading").textContent = "Add Product";
+
+  editingFrontImage = "";
+  editingBackImage = "";
+
+  $("frontPreview").src = "";
+  $("backPreview").src = "";
+
+  $("frontPreview").style.display = "none";
+  $("backPreview").style.display = "none";
+
+  $("cancelEdit").classList.add("hidden");
+}
+
+// ADD / UPDATE PRODUCT
+$("productForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMessage("dashboardMessage");
+
+  const id = $("productId").value;
+  const frontFile = $("productImage").files[0];
+  const backFile = $("productBackImage").files[0];
+
+  try {
+    let frontImage = editingFrontImage;
+    let backImage = editingBackImage;
+
+    if (frontFile) {
+      showMessage("dashboardMessage", "Uploading front photo...");
+      frontImage = await uploadToCloudinary(frontFile);
+    }
+
+    if (!frontImage) {
+      throw new Error("Front photo select cheyyuka.");
+    }
+
+    if (backFile) {
+      showMessage("dashboardMessage", "Uploading back photo...");
+      backImage = await uploadToCloudinary(backFile);
+    }
+
+    const product = {
+      name: $("productName").value.trim(),
+      description: $("productDescription").value.trim(),
+      price: Number($("productPrice").value),
+      image: frontImage,
+      back_image: backImage,
+      color: $("productColor").value.trim(),
+      sizes: $("productSizes").value
+        .split(",")
+        .map(size => size.trim())
+        .filter(Boolean),
+      stock: Number($("productStock").value)
+    };
+
+    const url = id
+      ? "/api/admin/products/" + encodeURIComponent(id)
+      : "/api/admin/products";
+
+    showMessage("dashboardMessage", "Saving product...");
+
+    await api(url, {
+      method: id ? "PUT" : "POST",
+      body: JSON.stringify(product)
+    });
+
+    resetProductForm();
+
+    showMessage("dashboardMessage", "Product saved successfully!");
+
+    await loadProducts();
+
+  } catch (error) {
+    showMessage("dashboardMessage", error.message);
+  }
+});
+
+// EDIT PRODUCT
+function editProduct(product) {
+  $("productId").value = product.id;
+  $("productName").value = product.name || "";
+  $("productDescription").value = product.description || "";
+  $("productPrice").value = product.price || "";
+  $("productColor").value = product.color || "";
+  $("productSizes").value = Array.isArray(product.sizes)
+    ? product.sizes.join(", ")
+    : "";
+  $("productStock").value = product.stock ?? 0;
+
+  editingFrontImage = product.image || "";
+  editingBackImage = product.back_image || "";
+
+  if (editingFrontImage) {
+    $("frontPreview").src = editingFrontImage;
+    $("frontPreview").style.display = "block";
+  }
+
+  if (editingBackImage) {
+    $("backPreview").src = editingBackImage;
+    $("backPreview").style.display = "block";
+  }
+
+  $("formHeading").textContent = "Edit Product";
+  $("cancelEdit").classList.remove("hidden");
+
+  $("productForm").scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+// CANCEL EDIT
+$("cancelEdit").addEventListener("click", resetProductForm);
+
+// DELETE PRODUCT
+async function deleteProduct(id) {
+  if (!confirm("Are you sure you want to delete this product?")) {
+    return;
+  }
+
+  try {
+    await api(
+      "/api/admin/products/" + encodeURIComponent(id),
+      {
+        method: "DELETE"
       }
+    );
+
+    showMessage("dashboardMessage", "Product deleted successfully!");
+    await loadProducts();
+
+  } catch (error) {
+    showMessage("dashboardMessage", error.message);
+  }
+}
+
+// LOAD ORDERS
+async function loadOrders() {
+  try {
+    const data = await api("/api/admin/orders");
+
+    const orders = Array.isArray(data)
+      ? data
+      : data.orders || [];
+
+    const list = $("ordersList");
+    list.innerHTML = "";
+
+    if (!orders.length) {
+      list.textContent = "No orders found.";
+      return;
     }
 
-    function renderProducts() {
-      const list = $("productsList");
-      list.replaceChildren();
+    orders.forEach(order => {
+      const item = document.createElement("div");
+      item.className = "order";
 
-      if (!products.length) {
-        list.textContent = "No active products found.";
-        return;
-      }
+      const heading = document.createElement("h3");
+      heading.textContent = "Order #" + order.id;
 
-      products.forEach(product => {
-        const card = document.createElement("article");
-        card.className = "product";
+      const details = document.createElement("p");
+      details.className = "muted";
+      details.textContent =
+        "Customer: " + (order.customer_name || "N/A") +
+        "\nStatus: " + (order.status || "N/A") +
+        "\nTotal: ₹" + (order.total || order.total_amount || 0);
 
-        if (product.image) {
-          const img = document.createElement("img");
-          img.src = product.image;
-          img.alt = product.name || "Product";
-          img.loading = "lazy";
-          img.onerror = () => img.remove();
-          card.appendChild(img);
-        }
+      item.append(heading, details);
+      list.appendChild(item);
+    });
 
-        const title = document.createElement("h3");
-        title.textContent = product.name || "Untitled product";
+  } catch (error) {
+    $("ordersList").textContent = error.message;
+  }
+}
 
-        const price = document.createElement("p");
-        price.className = "price";
-        price.textContent =
-          "₹" + Number(product.price || 0).toLocaleString("en-IN");
+// REFRESH BUTTONS
+$("refreshProducts").addEventListener("click", loadProducts);
+$("refreshOrders").addEventListener("click", loadOrders);
 
-        const details = document.createElement("p");
-        details.className = "muted";
-        details.textContent =
-          (product.description || "") +
-          "\nColour: " + (product.color || "—") +
-          "\nSizes: " + (
-            Array.isArray(product.sizes)
-              ? product.sizes.join(", ")
-              : product.sizes || "—"
-          ) +
-          "\nStock: " + (product.stock ?? 0);
-
-        const actions = document.createElement("div");
-        actions.className = "actions";
-
-        const edit = document.createElement("button");
-        edit.className = "primary";
-        edit.textContent = "Edit";
-        edit.addEventListener("click", () => editProduct(product));
-
-        const remove = document.createElement("button");
-        remove.className = "danger";
-        remove.textContent = "Remove";
-        remove.addEventListener("click", () => deleteProduct(product.id));
-
-        actions.append(edit, remove);
-        card.append(title, price, details, actions);
-        list.appendChild(card);
-      });
-    }
-
-    function editProduct(product) {
-      $("productId").value = product.id;
-      $("productName").value = product.name || "";
-      $("productPrice").value = product.price ?? "";
-      $("productDescription").value = product.description || "";
-      $("productImage").value = product.image || "";
-      $("productBackImage").value = product.back_image || "";
-      $("productColor").value = product.color || "";
-
-      $("productSizes").value = Array.isArray(product.sizes)
-        ? product.sizes.join(", ")
-        : product.sizes || "";
-
-      $("productStock").value = product.stock ?? 0;
-      $("formHeading").textContent = "Edit Product";
-      $("cancelEdit").classList.remove("hidden");
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    // SOFT DELETE PRODUCT
-    async function deleteProduct(id) {
-      if (!confirm("Remove this product from the store?")) return;
-
-      try {
-        await api("/api/admin/products/" + encodeURIComponent(id), {
-          method: "DELETE"
-        });
-
-        message("dashboardMessage", "Product removed.");
-        await loadProducts();
-      } catch (error) {
-        message("dashboardMessage", error.message);
-      }
-    }
-
-    // LOAD ORDERS
-    async function loadOrders() {
-      $("ordersList").textContent = "Loading orders...";
-
-      try {
-        const data = await api("/api/admin/orders");
-        const orders = Array.isArray(data.orders) ? data.orders : [];
-        renderOrders(orders);
-      } catch (error) {
-        $("ordersList").textContent =
-          "Could not load orders: " + error.message;
-      }
-    }
-
-    // DISPLAY ORDERS + STATUS UPDATE
-    function renderOrders(orders) {
-      const list = $("ordersList");
-      list.replaceChildren();
-
-      if (!orders.length) {
-        list.textContent = "No customer orders found.";
-        return;
-      }
-
-      const statuses = [
-        "NEW",
-        "CONFIRMED",
-        "PACKED",
-        "SHIPPED",
-        "DELIVERED",
-        "CANCELLED"
-      ];
-
-      orders.forEach(order => {
-        const card = document.createElement("article");
-        card.className = "order";
-
-        const title = document.createElement("h3");
-        title.textContent =
-          "Order " + (order.order_code || ("#" + order.id));
-
-        const details = document.createElement("p");
-        details.className = "muted";
-        details.textContent =
-          "Customer: " + (order.customer_name || "—") +
-          "\nPhone: " + (order.phone || "—") +
-          "\nAddress: " + (order.address || "—") +
-          "\nPayment method: " + (order.payment_method || "—") +
-          "\nPayment status: " + (order.payment_status || "PENDING") +
-          "\nOrder status: " + (order.order_status || "NEW") +
-          "\nTotal: ₹" +
-          Number(order.total || 0).toLocaleString("en-IN");
-
-        const items = document.createElement("p");
-        items.className = "muted";
-
-        const orderItems = Array.isArray(order.items)
-          ? order.items
-          : Array.isArray(order.items_json)
-            ? order.items_json
-            : [];
-
-        items.textContent = "Items: " + orderItems.map(item =>
-          `${item.name} × ${item.quantity}`
-        ).join(", ");
-
-        const select = document.createElement("select");
-
-        statuses.forEach(status => {
-          const option = document.createElement("option");
-          option.value = status;
-          option.textContent = status;
-          option.selected = status === (order.order_status || "NEW");
-          select.appendChild(option);
-        });
-
-        const update = document.createElement("button");
-        update.className = "primary";
-        update.textContent = "Update Status";
-
-        update.addEventListener("click", async () => {
-          try {
-            await api(
-              "/api/admin/orders/" +
-              encodeURIComponent(order.id) + "/status",
-              {
-                method: "PATCH",
-                body: JSON.stringify({ status: select.value })
-              }
-            );
-
-            message("dashboardMessage", "Order status updated.");
-            await loadOrders();
-          } catch (error) {
-            message("dashboardMessage", error.message);
-          }
-        });
-
-        card.append(title, details, items, select, update);
-        list.appendChild(card);
-      });
-    }
-
-    checkLogin();
-  </script>
+</script>
 </body>
 </html>
-      
-  
